@@ -6,11 +6,10 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -42,7 +41,7 @@ enum InvestmentStatus {
 
 model User {
   id            String       @id @default(uuid()) @db.Char(36)
-  first_name    String       @db.VarChar(100)
+  first_name    String?      @db.VarChar(100)
   last_name     String?      @db.VarChar(100)
   email         String       @unique @db.VarChar(255)
   password_hash String       @db.VarChar(255)
@@ -123,4 +122,11 @@ model WalletTransaction {
   type       String   @db.VarChar(20)
   note       String?
   created_at DateTime @default(now())
+}
+
+enum HttpMethod {
+  GET
+  POST
+  PUT
+  DELETE
 }
