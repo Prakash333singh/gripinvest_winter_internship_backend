@@ -1,0 +1,126 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RiskAppetite {
+  low
+  moderate
+  high
+}
+
+enum InvestmentType {
+  bond
+  fd
+  mf
+  etf
+  other
+}
+
+enum RiskLevel {
+  low
+  moderate
+  high
+}
+
+enum InvestmentStatus {
+  active
+  matured
+  cancelled
+}
+
+model User {
+  id            String       @id @default(uuid()) @db.Char(36)
+  first_name    String       @db.VarChar(100)
+  last_name     String?      @db.VarChar(100)
+  email         String       @unique @db.VarChar(255)
+  password_hash String       @db.VarChar(255)
+  risk_appetite RiskAppetite @default(moderate)
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+  investments         Investment[]
+  wallet              Wallet?
+  logs                TransactionLog[]
+  passwordResetTokens PasswordResetToken[]
+}
+
+model InvestmentProduct {
+  id              String         @id @default(uuid()) @db.Char(36)
+  name            String         @db.VarChar(255)
+  investment_type InvestmentType
+  tenure_months   Int
+  annual_yield    Decimal        @db.Decimal(5, 2)
+  risk_level      RiskLevel
+  min_investment  Decimal?       @db.Decimal(12, 2)
+  max_investment  Decimal?       @db.Decimal(12, 2)
+  description     String?
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
+  investments Investment[]
+}
+
+model Investment {
+  id              String            @id @default(uuid()) @db.Char(36)
+  user            User              @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id         String            @db.Char(36)
+  product         InvestmentProduct @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  product_id      String            @db.Char(36)
+  amount          Decimal           @db.Decimal(12, 2)
+  invested_at     DateTime          @default(now())
+  status          InvestmentStatus  @default(active)
+  expected_return Decimal?          @db.Decimal(12, 2)
+  maturity_date   DateTime?
+}
+
+model TransactionLog {
+  id            BigInt   @id @default(autoincrement())
+  user          User?    @relation(fields: [user_id], references: [id])
+  user_id       String?  @db.Char(36)
+  email         String?  @db.VarChar(255)
+  endpoint      String   @db.VarChar(255)
+  http_method   String   @db.VarChar(10)
+  status_code   Int
+  error_message String?
+  created_at    DateTime @default(now())
+}
+
+model PasswordResetToken {
+  id         String   @id @default(uuid()) @db.Char(36)
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id    String   @db.Char(36)
+  token      String   @db.VarChar(255)
+  expires_at DateTime
+  used       Boolean  @default(false)
+  created_at DateTime @default(now())
+}
+
+model Wallet {
+  id         String   @id @default(uuid()) @db.Char(36)
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id    String   @unique @db.Char(36)
+  balance    Decimal  @default(0.00) @db.Decimal(12, 2)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  transactions WalletTransaction[]
+}
+
+model WalletTransaction {
+  id         String   @id @default(uuid()) @db.Char(36)
+  wallet     Wallet   @relation(fields: [wallet_id], references: [id], onDelete: Cascade)
+  wallet_id  String   @db.Char(36)
+  amount     Decimal  @db.Decimal(12, 2)
+  type       String   @db.VarChar(20)
+  note       String?
+  created_at DateTime @default(now())
+}
