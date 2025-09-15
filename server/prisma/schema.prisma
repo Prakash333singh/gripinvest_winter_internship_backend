@@ -44,6 +44,7 @@ model User {
   first_name    String?      @db.VarChar(100)
   last_name     String?      @db.VarChar(100)
   email         String       @unique @db.VarChar(255)
+  is_admin      Boolean      @default(false)
   password_hash String       @db.VarChar(255)
   risk_appetite RiskAppetite @default(moderate)
   created_at    DateTime     @default(now())
@@ -83,15 +84,17 @@ model Investment {
 }
 
 model TransactionLog {
-  id            BigInt   @id @default(autoincrement())
-  user          User?    @relation(fields: [user_id], references: [id])
-  user_id       String?  @db.Char(36)
-  email         String?  @db.VarChar(255)
-  endpoint      String   @db.VarChar(255)
-  http_method   String   @db.VarChar(10)
-  status_code   Int
+  id          String   @id @default(uuid()) @db.Char(36)
+  user_id     String?  @db.Char(36)
+  endpoint    String
+  method      String
+  status_code Int
+  request_body Json?
+  response_body Json?
   error_message String?
-  created_at    DateTime @default(now())
+  created_at   DateTime @default(now())
+
+  user        User?    @relation(fields: [user_id], references: [id])
 }
 
 model PasswordResetToken {

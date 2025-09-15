@@ -2,7 +2,6 @@ import { prisma } from '../prisma';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET_KEY } from '../config';
-import crypto from 'crypto';
 import { sendEmail } from './emailService'; // your nodemailer setup
 
 export async function signup(email: string, password: string, firstName: string, lastName: string) {
@@ -14,6 +13,7 @@ export async function signup(email: string, password: string, firstName: string,
             password_hash: hashedPassword,
             first_name: firstName,
             last_name: lastName,
+            is_admin: false,
         },
         select: {
             id: true,
@@ -21,6 +21,7 @@ export async function signup(email: string, password: string, firstName: string,
             first_name: true,
             last_name: true,
             created_at: true,
+            is_admin: true,
         },
     });
 
@@ -34,6 +35,7 @@ export async function login(email: string, password: string) {
             id: true,
             email:true,
             password_hash: true,
+            is_admin:true,
         }
     });
 
@@ -42,7 +44,7 @@ export async function login(email: string, password: string) {
     const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) throw new Error('Invalid password');
 
-    const token = jwt.sign({ userId: user.id }, JWT_SECRET_KEY as string, { expiresIn: '1d' });
+    const token = jwt.sign({ userId: user.id ,email:user.email,is_admin:user.is_admin}, JWT_SECRET_KEY as string, { expiresIn: '1d' });
 
     const { password_hash, ...safeUser } = user;
     return { token, user:safeUser };

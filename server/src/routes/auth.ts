@@ -20,10 +20,12 @@ router.post('/login', async (req, res) => {
         res.status(400).json({ error: (e instanceof Error ? e.message : String(e))});
     }
 });
+
+
+
 router.post('/password/request-reset', async (req, res) => {
-    const { email } = req.body;
     try {
-        const result = await requestPasswordReset(email);
+        const result = await requestPasswordReset(req.body.email);
         res.json(result);
     } catch (e: any) {
         res.status(400).json({ error: e.message });
