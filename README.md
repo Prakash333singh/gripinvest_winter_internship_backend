@@ -1,6 +1,3 @@
-Got it ✅ — let’s create a **professional README** for your backend repo (`gripinvest_winter_internship_backend`).
-
----
 
 # 📖 README.md
 
@@ -190,11 +187,3 @@ This project integrates **AI-driven helpers**:
 ## 👤 Author
 
 **Prakash Singh**
-Winter Internship 2025 @ Grip Invest
-
-```
-
----
-
-👉 Next step: I can help you **write Jest tests module by module** (auth, products, investments, logs) so you reach **>75% coverage**. Do you want me to draft those test cases now?
-```
